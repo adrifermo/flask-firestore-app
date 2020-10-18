@@ -4,6 +4,7 @@
 import os
 from flask import Flask, request, jsonify
 from firebase_admin import credentials, firestore, initialize_app
+import logging
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -23,6 +24,9 @@ def create():
         e.g. json={'id': '1', 'title': 'Write a blog post'}
     """
     try:
+
+        logging.info(request)
+
         id = request.json['id']
         title = request.json['title']
         description = request.json['description']
@@ -38,7 +42,8 @@ def create():
 
         return jsonify({"success": True}), 200
     except Exception as e:
-        return "An Error Occured:" + e
+        print(e)
+        return "An Error Occured:"
 
 @app.route('/list', methods=['GET'])
 def read():
@@ -49,15 +54,17 @@ def read():
     """
     try:
         # Check if ID was passed to URL query
+
         todo_id = request.args.get('id')
         if todo_id:
             todo = collection.document(todo_id).get()
             return jsonify(todo.to_dict()), 200
         else:
-            all_todos = [doc.to_dict() for doc in todo_ref.stream()]
+            all_todos = [doc.to_dict() for doc in collection.stream()]
             return jsonify(all_todos), 200
     except Exception as e:
-        return "An Error Occured:" + e
+        print(e)
+        return "An Error Occured:"
 
 @app.route('/update', methods=['POST', 'PUT'])
 def update():
@@ -71,7 +78,8 @@ def update():
         collection.document(id).update(request.json)
         return jsonify({"success": True}), 200
     except Exception as e:
-        return "An Error Occured: " + e
+        print(e)
+        return "An Error Occured:"
 
 @app.route('/delete', methods=['GET', 'DELETE'])
 def delete():
@@ -84,7 +92,8 @@ def delete():
         collection.document(todo_id).delete()
         return jsonify({"success": True}), 200
     except Exception as e:
-        return "An Error Occured: {e}"
+        print(e)
+        return "An Error Occured:"
 
 port = int(os.environ.get('PORT', 8080))
 if __name__ == '__main__':
