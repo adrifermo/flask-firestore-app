@@ -38,7 +38,7 @@ def create():
 
         return jsonify({"success": True}), 200
     except Exception as e:
-        return "An Error Occured: {e}"
+        return "An Error Occured:" + e
 
 @app.route('/list', methods=['GET'])
 def read():
@@ -57,7 +57,7 @@ def read():
             all_todos = [doc.to_dict() for doc in todo_ref.stream()]
             return jsonify(all_todos), 200
     except Exception as e:
-        return "An Error Occured: {e}"
+        return "An Error Occured:" + e
 
 @app.route('/update', methods=['POST', 'PUT'])
 def update():
@@ -71,7 +71,7 @@ def update():
         collection.document(id).update(request.json)
         return jsonify({"success": True}), 200
     except Exception as e:
-        return "An Error Occured: {e}"
+        return "An Error Occured: " + e
 
 @app.route('/delete', methods=['GET', 'DELETE'])
 def delete():
