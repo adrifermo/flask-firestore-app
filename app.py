@@ -13,7 +13,7 @@ app = Flask(__name__)
 cred = credentials.Certificate("serviceAccountKey.json")
 default_app = initialize_app(cred)
 db = firestore.client()
-todo_ref = db.collection('devfest')
+collection = db.collection('devfest')
 
 @app.route('/add', methods=['POST'])
 def create():
@@ -24,7 +24,18 @@ def create():
     """
     try:
         id = request.json['id']
-        todo_ref.document(id).set(request.json)
+        title = request.json['title']
+        description = request.json['description']
+        speaker = request.json['speaker']
+
+        data = {
+            'description': description,
+            'title': title,
+            'speaker': speaker
+        }
+
+        collection.document(id).set(data)
+
         return jsonify({"success": True}), 200
     except Exception as e:
         return f"An Error Occured: {e}"
@@ -40,7 +51,7 @@ def read():
         # Check if ID was passed to URL query
         todo_id = request.args.get('id')
         if todo_id:
-            todo = todo_ref.document(todo_id).get()
+            todo = collection.document(todo_id).get()
             return jsonify(todo.to_dict()), 200
         else:
             all_todos = [doc.to_dict() for doc in todo_ref.stream()]
@@ -57,7 +68,7 @@ def update():
     """
     try:
         id = request.json['id']
-        todo_ref.document(id).update(request.json)
+        collection.document(id).update(request.json)
         return jsonify({"success": True}), 200
     except Exception as e:
         return f"An Error Occured: {e}"
@@ -70,7 +81,7 @@ def delete():
     try:
         # Check for ID in URL query
         todo_id = request.args.get('id')
-        todo_ref.document(todo_id).delete()
+        collection.document(todo_id).delete()
         return jsonify({"success": True}), 200
     except Exception as e:
         return f"An Error Occured: {e}"
